@@ -8,6 +8,7 @@
 #include <boost/beast/version.hpp>
 #include <boost/config.hpp>
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <mcl/assert.hpp>
 #include <mcl/stdint.hpp>
 
@@ -18,8 +19,9 @@ using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
 struct Session : public std::enable_shared_from_this<Session> {
 public:
-    explicit Session(tcp::socket&& socket_)
-        : socket{std::move(socket_)}
+    Session(net::io_context& ioc_, tcp::socket&& socket)
+        : ioc{ioc_}
+        , stream{std::move(socket)}
     {}
 
     void run()
@@ -30,10 +32,34 @@ public:
 private:
     void do_read()
     {
-        fmt::print("lolololololol\n");
+        http::async_read(stream, buf, req, [self = shared_from_this()](beast::error_code ec, std::size_t bytes_transferred) {
+            (void)bytes_transferred;
+
+            if (ec == http::error::end_of_stream)
+                return self->do_close();
+
+            ASSERT_MSG(!ec, "session::do_read {}", ec.message());
+
+            self->handle_request();
+        });
     }
 
-    tcp::socket socket;
+    void do_close()
+    {
+        beast::error_code ec;
+        stream.socket().shutdown(tcp::socket::shutdown_send, ec);
+        ASSERT_MSG(!ec, "session::do_close {}", ec.message());
+    }
+
+    void handle_request()
+    {
+        fmt::print("{} {} [{}]\n", req.method(), req.target(), req.body());
+    }
+
+    net::io_context& ioc;
+    beast::tcp_stream stream;
+    beast::flat_buffer buf;
+    http::request<http::string_body> req;
 };
 
 struct Listener : public std::enable_shared_from_this<Listener> {
@@ -63,7 +89,7 @@ public:
         acceptor.async_accept(ioc, [self = shared_from_this()](beast::error_code ec, tcp::socket socket) {
             ASSERT_MSG(!ec, "accept failure {}", ec.message());
 
-            std::make_shared<Session>(std::move(socket))->run();
+            std::make_shared<Session>(self->ioc, std::move(socket))->run();
 
             self->run();
         });
