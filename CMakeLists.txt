@@ -76,7 +76,7 @@ endif()
 # Dependencies
 
 if (NOT TARGET boost)
-    find_package(Boost 1.78.0 REQUIRED)
+    find_package(Boost 1.78.0 COMPONENTS coroutine REQUIRED)
 endif()
 
 if (NOT TARGET Catch2::Catch2)
