@@ -1,5 +1,6 @@
 
 #include <memory>
+#include <string_view>
 
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/spawn.hpp>
@@ -18,12 +19,43 @@ namespace http = beast::http;      // from <boost/beast/http.hpp>
 namespace net = boost::asio;       // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
+template<typename SendLambda>
+void handle_request(http::request<http::string_body> req, SendLambda send, net::yield_context yield)
+{
+    const auto string_response = [&req](http::status status, std::string_view reason) {
+        http::response<http::string_body> res{status, req.version()};
+        res.set(http::field::content_type, "text/html");
+        res.keep_alive(req.keep_alive());
+        res.body() = std::string{reason};
+        res.prepare_payload();
+        return res;
+    };
+
+    if (req.method() != http::verb::get) {
+        return send(string_response(http::status::bad_request, "Unknown HTTP method"));
+    }
+
+    return send(string_response(http::status::ok, "Test"));
+}
+
 void do_session(net::io_context& ioc, beast::tcp_stream stream, net::yield_context yield)
 {
     beast::error_code ec;
 
     beast::flat_buffer buf;
     http::request<http::string_body> req;
+    bool close = false;
+
+    const auto send_lambda = [&]<typename Msg>(Msg&& msg) {
+        close = msg.need_eof();
+
+        using is_request = typename Msg::is_request;
+        using body_type = typename Msg::body_type;
+        using fields_type = typename Msg::fields_type;
+        http::serializer<is_request::value, body_type, fields_type> ser{msg};
+
+        http::async_write(stream, ser, yield[ec]);
+    };
 
     for (;;) {
         http::async_read(stream, buf, req, yield[ec]);
@@ -32,9 +64,12 @@ void do_session(net::io_context& ioc, beast::tcp_stream stream, net::yield_conte
             break;
         ASSERT_MSG(!ec, "session::do_read {}", ec.message());
 
-        fmt::print("{} {} [{}]\n", req.method(), req.target(), req.body());
+        handle_request(req, send_lambda, yield);
 
-        break;
+        ASSERT_MSG(!ec, "write failure {}", ec.message());
+
+        if (close)
+            break;
     }
 
     stream.socket().shutdown(tcp::socket::shutdown_send, ec);
