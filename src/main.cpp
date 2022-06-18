@@ -1,4 +1,3 @@
-
 #include <memory>
 #include <string_view>
 
@@ -13,6 +12,8 @@
 #include <fmt/ostream.h>
 #include <mcl/assert.hpp>
 #include <mcl/stdint.hpp>
+
+#include "repository.hpp"
 
 namespace beast = boost::beast;    // from <boost/beast.hpp>
 namespace http = beast::http;      // from <boost/beast/http.hpp>
@@ -35,7 +36,17 @@ void handle_request(http::request<http::string_body> req, SendLambda send, net::
         return send(string_response(http::status::bad_request, "Unknown HTTP method"));
     }
 
-    return send(string_response(http::status::ok, "Test"));
+    libellus::Repository repo{"/Users/merry/Workspace/libellus", "refs/heads/main"};
+    const auto files = repo.get_listing("src/");
+    std::string result = "<ul>";
+    for (auto& f : *files) {
+        result += "<li>";
+        result += f.name;
+        result += "</li>";
+    }
+    result += "</ul>";
+
+    return send(string_response(http::status::ok, result));
 }
 
 void do_session(net::io_context& ioc, beast::tcp_stream stream, net::yield_context yield)

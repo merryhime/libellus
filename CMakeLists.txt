@@ -87,6 +87,11 @@ if (NOT TARGET fmt::fmt)
     find_package(fmt REQUIRED)
 endif()
 
+include(FindPkgConfig)
+
+pkg_check_modules(libgit2 REQUIRED IMPORTED_TARGET libgit2)
+pkg_check_modules(poppler REQUIRED IMPORTED_TARGET poppler)
+
 # Project files
 
 add_subdirectory(externals/mcl)
