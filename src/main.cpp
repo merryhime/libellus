@@ -14,6 +14,7 @@
 #include <mcl/stdint.hpp>
 
 #include "repository.hpp"
+#include "resources/repository_cpp.hpp"
 
 namespace beast = boost::beast;    // from <boost/beast.hpp>
 namespace http = beast::http;      // from <boost/beast/http.hpp>
@@ -36,12 +37,21 @@ void handle_request(http::request<http::string_body> req, SendLambda send, net::
         return send(string_response(http::status::bad_request, "Unknown HTTP method"));
     }
 
+    if (req.target() == "/resource") {
+        return send(string_response(http::status::ok, std::string_view{libellus::repository_cpp.data(), libellus::repository_cpp.size()}));
+    }
+
     libellus::Repository repo{"/Users/merry/Workspace/libellus", "refs/heads/main"};
-    const auto files = repo.get_listing("src/");
-    std::string result = "<ul>";
+    const auto files = repo.list(std::string{req.target()});
+
+    if (!files) {
+        return send(string_response(http::status::ok, "not found"));
+    }
+
+    std::string result = R"(<ul><li><a href="..">..</a></li>)";
     for (auto& f : *files) {
         result += "<li>";
-        result += f.name;
+        result += fmt::format(R"(<a href="{0}/">{0}</a>)", f.name);
         result += "</li>";
     }
     result += "</ul>";

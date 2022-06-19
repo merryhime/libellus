@@ -26,6 +26,7 @@ endif()
 
 # Add the module directory to the list of paths
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/externals/mcl/CMakeModules")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMakeModules")
 
 # Compiler flags
 if (MSVC)
