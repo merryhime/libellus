@@ -73,7 +73,11 @@ void do_session(net::io_context& ioc, beast::tcp_stream stream, net::yield_conte
 
         if (ec == http::error::end_of_stream)
             break;
-        ASSERT_MSG(!ec, "session::do_read {}", ec.message());
+
+        if (ec) {
+            fmt::print("session::do_read error: {}\n", ec.message());
+            break;
+        }
 
         handle_request(req, send_lambda, yield);
 
