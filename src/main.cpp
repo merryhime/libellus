@@ -14,38 +14,106 @@
 #include <mcl/stdint.hpp>
 
 #include "repository.hpp"
-#include "resources/repository_cpp.hpp"
+#include "resources/static/static_resources.hpp"
 
 namespace beast = boost::beast;    // from <boost/beast.hpp>
 namespace http = beast::http;      // from <boost/beast/http.hpp>
 namespace net = boost::asio;       // from <boost/asio.hpp>
-using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
+using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>beast::string_view
+
+beast::string_view mime_type(beast::string_view path)
+{
+    using beast::iequals;
+    auto const ext = [&path] {
+        auto const pos = path.rfind(".");
+        if (pos == beast::string_view::npos)
+            return beast::string_view{};
+        return path.substr(pos);
+    }();
+
+    if (iequals(ext, ".htm"))
+        return "text/html";
+    if (iequals(ext, ".html"))
+        return "text/html";
+    if (iequals(ext, ".php"))
+        return "text/html";
+    if (iequals(ext, ".css"))
+        return "text/css";
+    if (iequals(ext, ".txt"))
+        return "text/plain";
+    if (iequals(ext, ".js"))
+        return "application/javascript";
+    if (iequals(ext, ".mjs"))
+        return "application/javascript";
+    if (iequals(ext, ".json"))
+        return "application/json";
+    if (iequals(ext, ".xml"))
+        return "application/xml";
+    if (iequals(ext, ".swf"))
+        return "application/x-shockwave-flash";
+    if (iequals(ext, ".flv"))
+        return "video/x-flv";
+    if (iequals(ext, ".bmp"))
+        return "image/bmp";
+    if (iequals(ext, ".png"))
+        return "image/png";
+    if (iequals(ext, ".jpe"))
+        return "image/jpeg";
+    if (iequals(ext, ".jpeg"))
+        return "image/jpeg";
+    if (iequals(ext, ".jpg"))
+        return "image/jpeg";
+    if (iequals(ext, ".gif"))
+        return "image/gif";
+    if (iequals(ext, ".ico"))
+        return "image/vnd.microsoft.icon";
+    if (iequals(ext, ".tiff"))
+        return "image/tiff";
+    if (iequals(ext, ".tif"))
+        return "image/tiff";
+    if (iequals(ext, ".svg"))
+        return "image/svg+xml";
+    if (iequals(ext, ".svgz"))
+        return "image/svg+xml";
+    if (iequals(ext, ".ttf"))
+        return "font/ttf";
+    if (iequals(ext, ".woff"))
+        return "font/woff";
+    if (iequals(ext, ".woff2"))
+        return "font/woff2";
+    return "application/octet-stream";
+}
 
 template<typename SendLambda>
 void handle_request(http::request<http::string_body> req, SendLambda send, net::yield_context yield)
 {
-    const auto string_response = [&req](http::status status, std::string_view reason) {
+    const auto string_response = [&req](http::status status, beast::string_view content_type, std::string_view body) {
         http::response<http::string_body> res{status, req.version()};
-        res.set(http::field::content_type, "text/html");
+        res.set(http::field::content_type, content_type);
         res.keep_alive(req.keep_alive());
-        res.body() = std::string{reason};
+        res.body() = std::string{body};
         res.prepare_payload();
         return res;
     };
 
     if (req.method() != http::verb::get) {
-        return send(string_response(http::status::bad_request, "Unknown HTTP method"));
+        return send(string_response(http::status::bad_request, "text/plain", "Unknown HTTP method"));
     }
 
-    if (req.target() == "/resource") {
-        return send(string_response(http::status::ok, std::string_view{libellus::repository_cpp.data(), libellus::repository_cpp.size()}));
+    if (req.target().starts_with("/static/")) {
+        const auto& static_map = libellus::resources::static_resources_map;
+        const auto map_key = "resources" + std::string{req.target()};
+        if (auto iter = static_map.find(map_key); iter != static_map.end()) {
+            return send(string_response(http::status::ok, mime_type(map_key), std::string_view{(const char*)iter->second.data(), iter->second.size()}));
+        }
+        return send(string_response(http::status::not_found, "text/plain", "static file not found"));
     }
 
     libellus::Repository repo{"/Users/merry/Workspace/libellus", "refs/heads/main"};
     const auto files = repo.list(std::string{req.target()});
 
     if (!files) {
-        return send(string_response(http::status::ok, "not found"));
+        return send(string_response(http::status::ok, "text/plain", "not found"));
     }
 
     std::string result = R"(<ul><li><a href="..">..</a></li>)";
@@ -56,7 +124,7 @@ void handle_request(http::request<http::string_body> req, SendLambda send, net::
     }
     result += "</ul>";
 
-    return send(string_response(http::status::ok, result));
+    return send(string_response(http::status::ok, "text/html", result));
 }
 
 void do_session(net::io_context& ioc, beast::tcp_stream stream, net::yield_context yield)

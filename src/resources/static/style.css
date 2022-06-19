@@ -1,0 +1,91 @@
+body {
+  font-family: 'Droid Sans', 'DejaVu Sans', 'Tahoma', 'Verdana', sans-serif;
+  margin: 40px auto;
+  max-width: 650px;
+  line-height: 1.6;
+  font-size: 18px;
+  color: #444;
+  padding: 0 10px;
+}
+
+h1, h2, h3 {
+  line-height: 1.2;
+}
+
+header {
+  font-weight: 800;
+}
+
+.sub-h1 {
+  position: relative;
+  top: -.5em;
+}
+
+.breadcrumbs {
+  font-size: 80%;
+}
+
+code, tt {
+  padding: .2em .4em;
+  margin: 0;
+  background-color: rgba(27,31,35,.05);
+  border-radius: 3px;
+}
+
+pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f6f8fa;
+  border-radius: 3px;
+  margin-bottom: 0;
+  word-break: normal;
+  word-wrap: normal;
+  margin-top: 0;
+}
+
+table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+  margin-top: 0;
+  margin-bottom: 16px;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+table tr {
+  border-top: 1px solid #c6cbd1;
+}
+
+table th {
+  font-weight: 600;
+}
+
+table td, table th {
+  padding: 6px 13px;
+  border: 1px solid #dfe2e5;
+}
+
+.spill {
+  left: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  max-width: 100vw;
+  position: relative;
+  right: 50%;
+  width: 100vw;
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pullout {
+  background-color: rgba(27,31,35,.05);
+  padding: 1em;
+  border-radius: 10px;
+}

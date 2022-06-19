@@ -1,10 +1,91 @@
 include(AddResources)
 
-add_resources(test_resource
-    NAMESPACE libellus
-    HEADER_PATH resources
+add_resources(static_resources
+    GENERATE_MAP
+    NAMESPACE libellus::resources
+    HEADER_PATH resources/static
     FILES
-        repository.cpp
+        resources/static/katex/katex.css
+        resources/static/katex/katex.js
+        resources/static/katex/contrib/mhchem.mjs
+        resources/static/katex/contrib/render-a11y-string.js
+        resources/static/katex/contrib/mathtex-script-type.mjs
+        resources/static/katex/contrib/auto-render.mjs
+        resources/static/katex/contrib/auto-render.min.js
+        resources/static/katex/contrib/copy-tex.mjs
+        resources/static/katex/contrib/auto-render.js
+        resources/static/katex/contrib/mathtex-script-type.min.js
+        resources/static/katex/contrib/render-a11y-string.mjs
+        resources/static/katex/contrib/render-a11y-string.min.js
+        resources/static/katex/contrib/copy-tex.min.js
+        resources/static/katex/contrib/copy-tex.js
+        resources/static/katex/contrib/mathtex-script-type.js
+        resources/static/katex/contrib/mhchem.min.js
+        resources/static/katex/contrib/mhchem.js
+        resources/static/katex/katex.min.css
+        resources/static/katex/katex.min.js
+        resources/static/katex/fonts/KaTeX_Typewriter-Regular.woff2
+        resources/static/katex/fonts/KaTeX_Main-Regular.woff
+        resources/static/katex/fonts/KaTeX_AMS-Regular.ttf
+        resources/static/katex/fonts/KaTeX_Main-BoldItalic.woff
+        resources/static/katex/fonts/KaTeX_AMS-Regular.woff2
+        resources/static/katex/fonts/KaTeX_Size3-Regular.woff2
+        resources/static/katex/fonts/KaTeX_Main-Regular.woff2
+        resources/static/katex/fonts/KaTeX_Script-Regular.ttf
+        resources/static/katex/fonts/KaTeX_Caligraphic-Bold.woff2
+        resources/static/katex/fonts/KaTeX_Size3-Regular.ttf
+        resources/static/katex/fonts/KaTeX_Typewriter-Regular.woff
+        resources/static/katex/fonts/KaTeX_Caligraphic-Regular.woff
+        resources/static/katex/fonts/KaTeX_Typewriter-Regular.ttf
+        resources/static/katex/fonts/KaTeX_Main-Italic.woff
+        resources/static/katex/fonts/KaTeX_Caligraphic-Bold.ttf
+        resources/static/katex/fonts/KaTeX_SansSerif-Bold.woff2
+        resources/static/katex/fonts/KaTeX_Math-Italic.woff2
+        resources/static/katex/fonts/KaTeX_Size4-Regular.woff2
+        resources/static/katex/fonts/KaTeX_Fraktur-Bold.woff2
+        resources/static/katex/fonts/KaTeX_Caligraphic-Bold.woff
+        resources/static/katex/fonts/KaTeX_SansSerif-Bold.ttf
+        resources/static/katex/fonts/KaTeX_Fraktur-Regular.woff
+        resources/static/katex/fonts/KaTeX_Main-Bold.ttf
+        resources/static/katex/fonts/KaTeX_SansSerif-Italic.woff2
+        resources/static/katex/fonts/KaTeX_Main-Bold.woff2
+        resources/static/katex/fonts/KaTeX_SansSerif-Regular.woff2
+        resources/static/katex/fonts/KaTeX_Fraktur-Regular.ttf
+        resources/static/katex/fonts/KaTeX_Main-Regular.ttf
+        resources/static/katex/fonts/KaTeX_Size2-Regular.woff
+        resources/static/katex/fonts/KaTeX_Main-BoldItalic.woff2
+        resources/static/katex/fonts/KaTeX_Fraktur-Regular.woff2
+        resources/static/katex/fonts/KaTeX_Script-Regular.woff2
+        resources/static/katex/fonts/KaTeX_Size4-Regular.woff
+        resources/static/katex/fonts/KaTeX_Size3-Regular.woff
+        resources/static/katex/fonts/KaTeX_AMS-Regular.woff
+        resources/static/katex/fonts/KaTeX_Main-Bold.woff
+        resources/static/katex/fonts/KaTeX_SansSerif-Italic.ttf
+        resources/static/katex/fonts/KaTeX_Math-Italic.ttf
+        resources/static/katex/fonts/KaTeX_Size1-Regular.woff
+        resources/static/katex/fonts/KaTeX_SansSerif-Regular.woff
+        resources/static/katex/fonts/KaTeX_Main-Italic.ttf
+        resources/static/katex/fonts/KaTeX_Math-Italic.woff
+        resources/static/katex/fonts/KaTeX_Math-BoldItalic.woff2
+        resources/static/katex/fonts/KaTeX_Fraktur-Bold.ttf
+        resources/static/katex/fonts/KaTeX_Size2-Regular.ttf
+        resources/static/katex/fonts/KaTeX_SansSerif-Italic.woff
+        resources/static/katex/fonts/KaTeX_Main-Italic.woff2
+        resources/static/katex/fonts/KaTeX_Size1-Regular.woff2
+        resources/static/katex/fonts/KaTeX_Fraktur-Bold.woff
+        resources/static/katex/fonts/KaTeX_Script-Regular.woff
+        resources/static/katex/fonts/KaTeX_SansSerif-Regular.ttf
+        resources/static/katex/fonts/KaTeX_Math-BoldItalic.woff
+        resources/static/katex/fonts/KaTeX_Size1-Regular.ttf
+        resources/static/katex/fonts/KaTeX_Caligraphic-Regular.ttf
+        resources/static/katex/fonts/KaTeX_Size4-Regular.ttf
+        resources/static/katex/fonts/KaTeX_Size2-Regular.woff2
+        resources/static/katex/fonts/KaTeX_Caligraphic-Regular.woff2
+        resources/static/katex/fonts/KaTeX_Main-BoldItalic.ttf
+        resources/static/katex/fonts/KaTeX_SansSerif-Bold.woff
+        resources/static/katex/fonts/KaTeX_Math-BoldItalic.ttf
+        resources/static/katex/katex.mjs
+        resources/static/style.css
 )
 
 add_executable(libellus
@@ -12,5 +93,6 @@ add_executable(libellus
     repository.cpp
     repository.hpp
 )
-target_link_libraries(libellus PRIVATE merry::mcl PkgConfig::poppler PkgConfig::libgit2 test_resource ${Boost_LIBRARIES})
+target_link_libraries(libellus PRIVATE merry::mcl PkgConfig::poppler PkgConfig::libgit2 static_resources ${Boost_LIBRARIES})
 target_include_directories(libellus PRIVATE .)
+target_compile_definitions(libellus PRIVATE BOOST_BEAST_USE_STD_STRING_VIEW)
